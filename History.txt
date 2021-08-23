@@ -1,0 +1,49 @@
+K005849 revision history
+-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+
+V0.5.5 - 2021-03-06 (FluBBa)
+	Added load/save state.
+
+V0.5.1 - 2020-07-28 (FluBBa)
+	Tweaked number of scanlines per frame (from MAME).
+
+V0.5.0 - 2020-06-28 (FluBBa)
+	Added flipped sprites support.
+	Turned on scaled sprites.
+	Tweaked scaled sprite position.
+
+V0.4.0 - 2019-09-14 (FluBBa)
+	Optimised doScanline.
+	Optimised tile rendering.
+
+V0.3.0 - 2018-08-06 (FluBBa)
+	Added sprites on/off for K005849.
+	Fixed Unscaled mode a bit.
+	Fixed IRQ generation a bit.
+
+V0.2.8 - 2018-05-01 (FluBBa)
+	Added flipped background support.
+
+V0.2.6 - 2018-04-20 (FluBBa)
+	Fixed bug in tile cache when source was not aligned.
+
+V0.2.5 - 2018-03-28 (FluBBa)
+	More unified handling of tilemaps.
+
+V0.2.1 - 2017-01-06 (FluBBa)
+	Better support for bigger sprite rom (ddribble).
+
+V0.2.0 - 2016-09-19 (FluBBa)
+	Objectified chip.
+
+V0.1.0 - 2016-09-10 (FluBBa)
+	Added RAM access.
+	Broke out the graphic chip emulation.
+	Added support for vertical scrolling (Jail Break).
+	Added support for all 3 IRQ lines.
+	Rewrote all code to Unified style.
+
+V0.0.0 - 2005-06-05 (FluBBa)
+	First GBA release.
+

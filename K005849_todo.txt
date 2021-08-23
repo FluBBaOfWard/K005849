@@ -1,0 +1,448 @@
+K005849 To do
+--------------
+
+	Convert tiles runtime instead of pre-baking them.
+	Support remapping of sprite palettes? (Jackal)
+	Support remapping of individual sprite colours? (Green Beret, Jail Break, Scooter Shooter)
+	Optimize scroll copying.
+
+
+
+Konami 005849
+------
+Green Beret, Jail Break, Mr. Goemon & Scooter Shooter use this chip.
+It manages 48 sprites and a 64x32 tilemap.
+The chip also generates clock and 3 interrupt signals (suitable for a 6809/Z80).
+It uses 0x2000 bytes of RAM for the tilemaps and sprites, and an additional
+0x40(0x100?) bytes for scroll RAM. The maximum addressable ROM is 0x20000 bytes.
+Tile and sprite data both come from the same ROM space.
+Two 32x4 lookup PROMs are also used to increase the color combinations.
+All tilemap / sprite priority handling is done internally.
+
+inputs:
+- address lines (A0-A13)
+- data lines (DB0-DB7)
+- misc interface stuff
+- data from the gfx ROMs (DC0-DC7)
+- data from the palette lookup PROMs (DF0-DF3)
+
+outputs:
+- address lines for tilemap RAM (AX0-AX12)
+- data lines for tilemap RAM (DVO0-DVO7)
+- address lines for the small RAM (DA0-DA7)
+- data lines for the small RAM (DD0-DD7)
+- address lines for the gfx ROMs (AC0-AC16)
+- address lines for the palette lookup PROMs (AF0-AF7)
+- NNMI, NIRQ, NFIR, NCPE, NCPQ, NEQ for the main CPU
+- misc interface stuff
+- color code to be output on screen (COL0-COL4)
+
+0x0000-0x07ff ColorRam
+0x0800-0x0fff VideoRam
+0x1000-0x10bf SpriteRam1
+0x10c0-0x10ff WorkRam
+0x1100-0x11bf SpriteRam2
+0x11c0-0x1fff WorkRam
+0x2000-0x203f ZRam
+0x2040-0x2044 Control Registers
+0x2045-0x207f Open bus?
+0x2080-0x3fff Mirror of 0x2000-0x207f?
+
+Control Registers
+000:          scroll y
+001:          scroll x (low 8 bits)
+002: -------x scroll x (high bit)?
+     ------x- use scroll ram (ZRAM) (grenberet, jailbrek, mrgoemon, scotrsht)
+     -----x-- scroll ram affects 0=rows, 1=columns (jailbrek end credits, scotrsht)
+003: -------x bit 9 or 10 of the bgr tile code. (scotrsht gameplay)
+     ------x- bit 11 of the bgr tile code? (grenberet, jailbrek, mrgoemon, scotrsht)
+     -----x-- unused?
+     ----x--- selects sprite buffer, 0=0x1000, 1=0x1100.
+     ---x---- unused?
+     --x----- unknown (mrgoemon), map tile attribute bit 7 to priority?
+     -x------ unknown (jailbrek), map tile attribute bit 7 to tile number bit 9?
+     x------- Turn off the leftmost and rightmost columns, switching the
+		      visible area from 256 to 240 pixels.
+004: -------x Scanline interrupt enable (nmi)
+     ------x- VBlank interrupt enable (irq)
+     -----x-- 1/2 VBlank interrupt enable (firq)
+     ----x--- flip screen
+
+/*
+ * Sprite Format
+ * ------------------
+ *
+ * There are 48 16x16 sprites, each one using 4 bytes.
+ *
+ * Byte | Bit(s)   | Use
+ * -----+-76543210-+----------------
+ *   0  | xxxxxxxx | sprite code
+ *   1  | x------- | x position (high bit)
+ *   1  | -x------ | sprite code bit 8
+ *   1  | --x----- | flip y
+ *   1  | ---x---- | flip x
+ *   1  | ----xxxx | color
+ *   2  | xxxxxxxx | x position (low 8 bits)
+ *   3  | xxxxxxxx | y position
+ *
+ */
+
+The tile map uses 2 bytes per tile:
+byte #0:    tile number
+byte #1:    attributes
+    bits 0..3:  tile palette
+    bit 4:      flip x
+    bit 5:      flip y
+    bit 6:      tile number bit 8
+    bit 7:      tile number bit 9 / priority?
+
+
+
+
+Konami 005885
+------
+Double Dribble, Finalizer, Iron Horse & Jackal use this chip.
+Some games use two of these in pair. Jackal even puts together the two 4bpp
+tilemaps to form a single 8bpp one.
+It manages 64 sprites and 2 32x32 or 1 64x32 tilemap (only Double Dribble uses
+the 64x32 one).
+The chip also generates clock and interrupt signals suitable for a 6809.
+It uses 0x2000 bytes of RAM for the tilemaps and sprites, and an additional
+0x100 bytes, maybe for scroll RAM and line buffers. The maximum addressable
+ROM is 0x20000 bytes (addressed 16 bits at a time). Tile and sprite data both
+come from the same ROM space. Double Dribble and Jackal have external circuitry
+to extend the limits and use separated addressing spaces for sprites and tiles.
+All games use external circuitry to reuse one or both the tile flip attributes
+as an additional address bit.
+Two 256x4 lookup PROMs are also used to increase the color combinations.
+All tilemap / sprite priority handling is done internally and the chip exports
+5 bits of color code, composed of 1 bit indicating tile or sprite, and 4 bits
+of ROM data remapped through the PROM.
+396 cycles per scanline.
+
+inputs:
+- address lines (A0-A13)
+- data lines (DB0-DB7)
+- misc interface stuff
+- data from the gfx ROMs (RDL0-RDL7, RDU0-RDU7)
+- data from the tile lookup PROMs (VCD0-VCD3)
+- data from the sprite lookup PROMs (OCD0-OCD3)
+
+outputs:
+- address lines for tilemap RAM (AX0-AX12)
+- data lines for tilemap RAM (VO0-VO7)
+- address lines for the small RAM (FA0-FA7)
+- data lines for the small RAM (FD0-FD7)
+- address lines for the gfx ROMs (R0-R15)
+- address lines for the tile lookup PROMs (VCF0-VCF3, VCB0-VCB3)
+- address lines for the sprite lookup PROMs (OCB0-OCB3, OCF0-OCF3)
+- NNMI, NIRQ, NFIR, NCPE, NCPQ, NEQ for the main CPU
+- misc interface stuff
+- color code to be output on screen (COL0-COL4)
+
+0x0000-0x0004 Control Registers
+0x0005-0x001f Open bus?
+0x0020-0x005f ZRam
+0x0060-0x007f Open bus?
+0x0080-0x1fff Mirror of 0x00-0x7f?
+0x2000-0x23ff ColorRam1
+0x2400-0x27ff VideoRam1
+0x2800-0x2bff ColorRam2
+0x2c00-0x2fff VideoRam2
+0x3000-0x313f SpriteRam1
+0x3140-0x37ff WorkRam
+0x3800-0x393f SpriteRam2
+0x3940-0x3fff WorkRam
+
+Control Registers
+000:          scroll y
+001:          scroll x (low 8 bits)
+002: -------x scroll x (high bit)
+     ------x- use scroll ram (ZRAM)
+     -----x-- scroll ram affects 0=rows, 1=columns
+     ----x--- unknown (1 tilemap?)(ironhors, jackal)
+              000x = solid scroll (finalizr, ddribble bg)
+              100x = solid scroll (jackal)
+              001x = rowscroll (ddribble fg)
+              011x = colscroll (jackal high scores, finalizr)
+              101x = rowscroll (ironhors, jackal map)
+003: ------xx high bits of the tile code
+     -----x-- left tilemap overlay? (finalizr)
+     ----x--- selects sprite buffer
+     ---x---- unused?
+     --x----- unknown (ironhors)
+     -x------ unknown (ironhors)
+     x------- Turn off the leftmost and rightmost columns, switching the
+		      visible area from 256 to 240 pixels.
+004: -------x Scanline interrupt enable (nmi)
+     ------x- VBlank interrupt enable (irq)
+     -----x-- 1/2 VBlank interrupt enable (firq)
+     ----x--- flip screen
+     ---x---- Scanline interrupt counter 0=32,1=64. (ironhors)
+
+
+/*
+ * Sprite Format
+ * ------------------
+ *
+ * There are 64 sprites, each one using 5 bytes.
+ *
+ * Byte | Bit(s)   | Use
+ * -----+-76543210-+----------------
+ *   0  | xxxxxxxx | sprite code
+ *   1  | xxxx---- | color
+ *   1  | ----xx-- | sprite code low 2 bits for 16x8/8x16/8x8 sprites (finalizr, ironhors)
+ *   1  | ------xx | sprite code bank bits 1/0
+ *   2  | xxxxxxxx | y position
+ *   3  | xxxxxxxx | x position (low 8 bits)
+ *   4  | x------- | unused?
+ *   4  | -x------ | flip y
+ *   4  | --x----- | flip x
+ *   4  | ---xxx-- | sprite size 000=16x16 001=16x8 010=8x16 011=8x8 100=32x32
+ *   4  | ------x- | ??? (finalizr)
+ *   4  | -------x | x position (high bit)
+ *
+ */
+
+The tile map uses 2 bytes per tile:
+byte #0:    tile number
+byte #1:    attributes
+    bits 0..3:  tile palette
+    bit 4:      flip x
+    bit 5:      flip y (ddribble tile number bit 10)  (ironhors tile number bit 9)
+    bit 6:      tile number bit 8
+    bit 7:      tile number bit 9
+
+
+
+
+Konami 007121
+------
+Combat School, Contra, Fast Lane, Flak Attack, Labyrinth Runner & Haunted Castle
+use this chip.
+This is an interesting beast. It is an evolution of the 005885, with more
+features. Many games use two of these in pair.
+It manages 64(?) sprites and two 32x32 tilemaps. The tilemaps can be joined to form
+a single 64x32 one, or one of them can be moved to the side of screen, giving
+a high score display suitable for vertical games.
+The chip also generates clock and interrupt signals suitable for a 6809.
+It uses 0x2000 bytes of RAM for the tilemaps and sprites, and an additional
+0x100 bytes, maybe for scroll RAM and line buffers. The maximum addressable
+ROM is 0x80000 bytes (addressed 16 bits at a time). Tile and sprite data both
+come from the same ROM space.
+Two 256x4 lookup PROMs are also used to increase the color combinations.
+All tilemap / sprite priority handling is done internally and the chip exports
+7 bits of color code, composed of 2 bits of palette bank, 1 bit indicating tile
+or sprite, and 4 bits of ROM data remapped through the PROM.
+
+inputs:
+- address lines (A0-A13)
+- data lines (DB0-DB7)
+- misc interface stuff
+- data from the gfx ROMs (RDL0-RDL7, RDU0-RDU7)
+- data from the tile lookup PROMs (VCD0-VCD3)
+- data from the sprite lookup PROMs (OCD0-OCD3)
+
+outputs:
+- address lines for tilemap RAM (AX0-AX12)
+- data lines for tilemap RAM (VO0-VO7)
+- address lines for the small RAM (FA0-FA7)
+- data lines for the small RAM (FD0-FD7)
+- address lines for the gfx ROMs (R0-R17)
+- address lines for the tile lookup PROMs (VCF0-VCF3, VCB0-VCB3)
+- address lines for the sprite lookup PROMs (OCB0-OCB3, OCF0-OCF3)
+- NNMI, NIRQ, NFIR, NE, NQ for the main CPU
+- misc interface stuff
+- color code to be output on screen (COA0-COA6)
+
+0x0000-0x0007 Control Registers
+0x0008-0x001f Open bus?
+0x0020-0x005f ZRam
+0x0060-0x007f Open bus?
+0x0080-0x1fff Mirror of 0x00-0x7f?
+0x2000-0x23ff ColorRam1
+0x2400-0x27ff VideoRam1
+0x2800-0x2bff ColorRam2
+0x2c00-0x2fff VideoRam2
+0x3000-0x327f SpriteRam1
+0x3280-0x37ff WorkRam
+0x3800-0x3A7f SpriteRam2
+0x3A80-0x3fff WorkRam
+
+control registers
+000:          scroll x (low 8 bits)
+001: -------x scroll x (high bit)
+     ------x- use scroll ram (ZRAM)
+     -----x-- scroll ram affects 0=rows, 1=columns
+     ----x--- this probably selects an alternate screen layout used in combat
+              school where tilemap #2 is overlayed on front and doesn't scroll.
+              The 32 lines of the front layer can be individually turned on or
+			  off using the second 32 bytes of scroll RAM.
+     -xxx---- empty
+     x------- unknown
+002:          scroll y
+003: -------x bit 13 of the tile code
+     ------x- empty
+     -----x-- might be sprite / tilemap priority (0 = sprites have priority)
+              (combat school, contra, haunted castle(0/1), labyrunr)
+     ----x--- selects sprite buffer
+     ---x---- screen layout selector:
+              when this is set, 5 columns are added on the left of the screen
+              (that means 5 rows at the top for vertical games), and the
+              rightmost 2 columns are chopped away.
+              Tilemap #2 is used to display the 5 additional columns on the
+              left. The rest of tilemap #2 is not used and can be used as work
+              RAM by the program.
+              The visible area becomes 280x224.
+              Note that labyrunr changes this at runtime, setting it during
+              gameplay and resetting it on the title screen and crosshatch.
+     --x----- might be sprite / tilemap priority (0 = sprites have priority)
+              (combat school, contra, haunted castle(0/1), labyrunr)
+     -x------ Chops away the leftmost and rightmost columns, switching the
+              visible area from 256 to 240 pixels. This is used by combatsc on
+              the scrolling stages, and by labyrunr on the title screen.
+     x------- empty
+004: ----xxxx bits 9-12 of the tile code. Only the bits enabled by the following
+              mask are actually used, and replace the ones selected by register
+              005.
+     xxxx---- mask enabling the above bits
+005: selects where in the attribute byte to pick bits 9-12 of the tile code,
+	 output to pins R12-R15. The bit of the attribute byte to use is the
+	 specified bit (0-3) + 3, that is one of bits 3-6. Bit 7 is hardcoded as
+	 bit 8 of the code. Bits 0-2 are used for the color, however note that
+	 some games use bit 3 as well (see below).
+     ------xx attribute bit to use for tile code bit  9
+     ----xx-- attribute bit to use for tile code bit 10
+     --xx---- attribute bit to use for tile code bit 11
+     xx------ attribute bit to use for tile code bit 12
+006: ----xxxx select additional effect for bits 3-6 of the tile attribute (the
+              same ones indexed by register 005). Note that an attribute bit
+              can therefore be used at the same time to be BOTH a tile code bit
+              and an additional effect.
+     -------x bit 3 of attribute is bit 3 of color (combatsc, fastlane, flkatck)
+     ------x- bit 4 of attribute is tile flip X (assumption - no game uses this)
+     -----x-- bit 5 of attribute is tile flip Y (flkatck)
+     ----x--- bit 6 of attribute is tile priority over sprites (combatsc, hcastle,
+              labyrunr)
+              Note that hcastle sets this bit for layer 0, and bit 6 of the
+              attribute is also used as bit 12 of the tile code, however that
+              bit is ALWAYS set throughout the game.
+              combatsc uses the bit in the "graduation" scene during attract mode,
+              to place soldiers behind the stand.
+              Use in labyrunr has not been investigated yet.
+     --xx---- palette bank (both tiles and sprites, see contra)
+     xx------ empty
+007: -------x Scanline interrupt enable (nmi)
+     ------x- VBlank interrupt enable (irq)
+	 -----x-- 1/2 VBlank interrupt enable (firq)
+     ----x--- flip screen
+     ---x---- Scanline interrupt counter 0=16,1=32.
+     xxx----- empty
+
+
+/*
+ * Sprite Format
+ * ------------------
+ *
+ * There are 64 sprites, each one using 5 bytes. However the number of
+ * sprites can be increased to 0x80 with a control register (Combat School
+ * sets it on and off during the game).
+ *
+ * Byte | Bit(s)   | Use
+ * -----+-76543210-+----------------
+ *   0  | xxxxxxxx | sprite code
+ *   1  | xxxx---- | color
+ *   1  | ----xx-- | sprite code low 2 bits for 16x8/8x8 sprites
+ *   1  | ------xx | sprite code bank bits 1/0
+ *   2  | xxxxxxxx | y position
+ *   3  | xxxxxxxx | x position (low 8 bits)
+ *   4  | xx------ | sprite code bank bits 3/2
+ *   4  | --x----- | flip y
+ *   4  | ---x---- | flip x
+ *   4  | ----xxx- | sprite size 000=16x16 001=16x8 010=8x16 011=8x8 100=32x32
+ *   4  | -------x | x position (high bit)
+ *
+ * Flack Attack uses a different, "wider" layout with 32 bytes per sprite,
+ * mapped as follows, and the priority order is reversed. Maybe it is a
+ * compatibility mode with an older custom IC. It is not known how this
+ * alternate layout is selected.
+ *
+ * 0 -> e
+ * 1 -> f
+ * 2 -> 6
+ * 3 -> 4
+ * 4 -> 8
+ *
+ */
+
+The tile map uses 2 bytes per tile:
+byte #0:    tile number
+byte #1:    attributes
+    bits 0..2:  tile palette
+    bits 3..6:  see ctrl regs
+    bit 7:      tile number bit 8
+
+
+
+
+Konami 007342
+------
+The 007342 manages 2 64x32 scrolling tilemaps with 8x8 characters, and
+optionally generates timing clocks and interrupt signals. It uses 0x2000
+bytes of RAM, plus 0x0200 bytes for scrolling, and a variable amount of ROM.
+It cannot read the ROMs.
+
+control registers
+000: ------x- INT control
+     ---x---- flip screen (TODO: doesn't work with thehustl)
+001: Used for banking in Rock'n'Rage
+002: -------x MSB of x scroll 1
+     ------x- MSB of x scroll 2
+     ---xxx-- layer 1 row/column scroll control
+              000 = disabled
+              010 = unknown (bladestl shootout between periods)
+              011 = 32 columns (Blades of Steel)
+              101 = 256 rows (Battlantis, Rock 'n Rage)
+     x------- enable sprite wraparound from bottom to top (see Blades of Steel
+              high score table)
+003: x scroll 1
+004: y scroll 1
+005: x scroll 2
+006: y scroll 2
+007: not used
+
+The tile map uses 2 bytes per tile:
+byte #0:    tile number
+byte #1:    attributes
+    bits 0..3:  depends on external connections (usually color and banking)
+    bit 4:      flip X
+    bit 5:      flip Y
+    bit 6:      depends on external conections
+    bit 7:      tiles with priority over the sprites
+
+
+Konami 007420
+------
+Sprite generator. 64 sprites, 8 bytes per sprite with zoom.
+It uses 0x200 bytes of RAM, and a variable amount of ROM.
+Nothing is known about its external interface.
+
+/*
+ * Sprite Format
+ * ------------------
+ *
+ * Byte | Bit(s)   | Use
+ * -----+-76543210-+----------------
+ *   0  | xxxxxxxx | y position
+ *   1  | xxxxxxxx | sprite code (low 8 bits)
+ *   2  | xxxxxxxx | depends on external conections. Usually banking
+ *   3  | xxxxxxxx | x position (low 8 bits)
+ *   4  | x------- | x position (high bit)
+ *   4  | -xxx---- | sprite size 000=16x16 001=8x16 010=16x8 011=8x8 100=32x32
+ *   4  | ----x--- | flip y
+ *   4  | -----x-- | flip x
+ *   4  | ------xx | zoom (bits 8 & 9)
+ *   5  | xxxxxxxx | zoom (low 8 bits)  0x080 = normal, < 0x80 enlarge, > 0x80 reduce
+ *   6  | xxxxxxxx | unused
+ *   7  | xxxxxxxx | unused
+ */
