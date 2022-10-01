@@ -808,7 +808,7 @@ convertSprites5849:			;@ in r0 = destination.
 	add r10,r10,#0x1100			;@ This should be 0x1000 + 0x100/0
 	sub r10,r10,r4,lsl#5		;@ See intro on Jail Break.
 
-	ldr r7,=g_scaling
+	ldr r7,=gScaling
 	ldrb r7,[r7]
 	cmp r7,#UNSCALED			;@ Do autoscroll
 	ldreq r7,=0x01000000		;@ No scaling
@@ -896,7 +896,7 @@ convertSprites5885:			;@ in r0 = destination.
 	add r10,r10,#0x1000
 	add r10,r10,r0,lsl#8		;@ Iron Horse wants it this way. Maybe not ddribble?
 
-	ldr r7,=g_scaling
+	ldr r7,=gScaling
 	ldrb r7,[r7]
 	cmp r7,#UNSCALED			;@ Do autoscroll
 	ldreq r7,=0x01000000		;@ No scaling
