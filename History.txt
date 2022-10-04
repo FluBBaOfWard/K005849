@@ -2,6 +2,9 @@ K005849 revision history
 -=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 
+V0.6.0 - 2022-10-04 (FluBBa)
+	Fixed 5885 sprites when screen is flipped.
+
 V0.5.5 - 2021-03-06 (FluBBa)
 	Added load/save state.
 

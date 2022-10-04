@@ -144,7 +144,7 @@ outputs:
 0x0005-0x001f Open bus?
 0x0020-0x005f ZRam
 0x0060-0x007f Open bus?
-0x0080-0x1fff Mirror of 0x00-0x7f?
+0x0080-0x07ff Mirror of 0x00-0x7f?
 0x2000-0x23ff ColorRam1
 0x2400-0x27ff VideoRam1
 0x2800-0x2bff ColorRam2
@@ -198,7 +198,7 @@ Control Registers
  *   4  | x------- | unused?
  *   4  | -x------ | flip y
  *   4  | --x----- | flip x
- *   4  | ---xxx-- | sprite size 000=16x16 001=16x8 010=8x16 011=8x8 100=32x32
+ *   4  | ---xxx-- | sprite size 000=16x16 001=16x8 010=8x16 011=8x8 1xx=32x32
  *   4  | ------x- | ??? (finalizr)
  *   4  | -------x | x position (high bit)
  *
@@ -259,7 +259,7 @@ outputs:
 0x0008-0x001f Open bus?
 0x0020-0x005f ZRam
 0x0060-0x007f Open bus?
-0x0080-0x1fff Mirror of 0x00-0x7f?
+0x0080-0x07ff Mirror of 0x00-0x7f?
 0x2000-0x23ff ColorRam1
 0x2400-0x27ff VideoRam1
 0x2800-0x2bff ColorRam2

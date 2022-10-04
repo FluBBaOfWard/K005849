@@ -803,10 +803,11 @@ convertSprites5849:			;@ in r0 = destination.
 	cmp r0,#0
 	blne reloadSprites
 
-	and r4,r4,#0x08
+	ldrb r0,[koptr,#sprBank]
+	and r0,r0,#0x08
 	ldr r10,[koptr,#gfxRAM]
 	add r10,r10,#0x1100			;@ This should be 0x1000 + 0x100/0
-	sub r10,r10,r4,lsl#5		;@ See intro on Jail Break.
+	sub r10,r10,r0,lsl#5		;@ See intro on Jail Break.
 
 	ldr r7,=gScaling
 	ldrb r7,[r7]
@@ -824,14 +825,14 @@ convertSprites5849:			;@ in r0 = destination.
 	orrne r5,r5,#0x0100			;@ Scaling
 
 	ldrb r4,[koptr,#irqControl]
-	tst r4,#0x08				;@ Flip enabled?
+	tst r4,#0x08				;@ Screen flip enabled?
 	orrne r5,#0x30000000		;@ Flips
 	rsbne r7,r7,#0
 	rsbne r6,r0,#0xE8
 
 	add r10,r10,r8,lsl#2		;@ Begin with the last sprite
 dm5:
-	ldr r4,[r10,#-4]!			;@ GreenBeret OBJ, r4=Tile,Attrib,Xpos,Ypos.
+	ldr r4,[r10,#-4]!			;@ K005849 OBJ, r4=Tile,Attrib,Xpos,Ypos.
 	movs r0,r4,lsr#24			;@ Mask Y, check yPos 0
 	beq skipSprite
 	movs r1,r4,lsr#16			;@ Attrib bit7, xpos bit 8
@@ -893,8 +894,8 @@ convertSprites5885:			;@ in r0 = destination.
 	ldrb r0,[koptr,#sprBank]
 	and r0,r0,#0x08
 	ldr r10,[koptr,#gfxRAM]
-	add r10,r10,#0x1000
-	add r10,r10,r0,lsl#8		;@ Iron Horse wants it this way. Maybe not ddribble?
+	add r10,r10,#0x1800
+	sub r10,r10,r0,lsl#8		;@ Iron Horse wants it this way. Maybe not ddribble?
 
 	ldr r7,=gScaling
 	ldrb r7,[r7]
@@ -912,10 +913,10 @@ convertSprites5885:			;@ in r0 = destination.
 	orrne r5,r5,#0x0100			;@ Scaling
 
 	ldrb r4,[koptr,#irqControl]
-	tst r4,#0x08				;@ Flip enabled?
+	tst r4,#0x08				;@ Screen flip enabled?
 	orrne r5,#0x30000000		;@ Flips
 	rsbne r7,r7,#0
-	rsbne r6,r0,#0xF0
+	rsbne r6,r0,#GAME_HEIGHT+0x10
 	mov r6,r6,lsl#16
 
 	mov r8,#64					;@ Number of sprites.
@@ -927,41 +928,49 @@ dm4:
 	beq dm8
 	ldrb r1,[r10,#-2]			;@ X pos
 	ldrb r2,[r10,#-1]			;@ Size, flip, high X bit.
+	orr r1,r1,r2,lsl#8			;@ Xpos bit8
 	mov r1,r1,lsl#23
-	orr r1,r1,r2,lsl#31			;@ Xpos bit8
 
 	tst r7,#0x80000000			;@ Is scaling negative (flip)?
-	rsbne r1,r1,#0x78000000		;@ Flip Xpos
+	subeq r1,r1,#((GAME_WIDTH-SCREEN_WIDTH)/2)<<23
+	rsbne r1,r1,#0x80000000		;@ Flip Xpos
 
-	orr r1,r5,r1,lsr#7
 	and r0,r2,#0x60				;@ X/Yflip
-	eor r1,r1,r0,lsl#23
+	eor r1,r1,r0,lsr#2
 
 	mvn r0,#0					;@ Tile number mask
-	mov r4,#4					;@ Sprite height / 2
+	mov r4,#0x11				;@ Sprite width & height / 8
 	ands r2,r2,#0x1C			;@ 16x16 size
-	orreq r1,r1,#0x40000000
+	orreq r1,r1,#0x00000020
 	mvneq r0,#0x03
-	moveq r4,#8
+	moveq r4,#0x22
 	tst r2,#0x10				;@ 32x32 size
-	orrne r1,r1,#0x80000000
+	orrne r1,r1,#0x00000040
 	mvnne r0,#0x0F
-	movne r4,#0x10
+	movne r4,#0x44
 	cmp r2,#0x08				;@ 8x16
-	orreq r1,r1,#0x00008000
+	orreq r1,r1,#0x00400000
 	mvneq r0,#0x02
-	moveq r4,#8
+	moveq r4,#0x12
 	cmp r2,#0x04				;@ 16x8
-	orreq r1,r1,#0x00004000
+	orreq r1,r1,#0x00020000
 	mvneq r0,#0x01
-	cmp r4,#4
-	biceq r1,r1,#0x00000100		;@ No scale for 8high sprites
+	moveq r4,#0x21
 
+	tst r7,#0x80000000			;@ Is scaling negative (flip)?
+	mov r2,r4,lsr#4				;@ Mask width
+	subne r1,r1,r2,lsl#26
+	eor r1,r5,r1,ror#7
+
+	tst r4,#1
+	bicne r1,r1,#0x00000100		;@ No scale for 8high sprites
+
+	and r4,r4,#0x0F				;@ Mask height
 	sub r3,r3,r6,asr#16			;@ Y offset
-	add r3,r3,r4
+	add r3,r3,r4,lsl#2
 	mul r3,r7,r3				;@ Y scaling
 	add r3,r3,#0x00800000		;@ Add 0.5 for rounding.
-	sub r3,r3,r4,lsl#24
+	sub r3,r3,r4,lsl#26
 	orr r3,r1,r3,lsr#24			;@ Size + scaling + yoffset
 
 	str r3,[r11],#4				;@ Store OBJ Atr 0,1. Xpos, ypos, flip, scale/rot, size, shape.
