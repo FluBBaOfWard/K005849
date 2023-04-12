@@ -2,6 +2,11 @@ K005849 revision history
 -=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 
+V0.6.1 - 2023-04-12 (FluBBa)
+	Added defines for the two different chips.
+	Fixed vertical timing.
+	Fixed 16x8 sprites.
+
 V0.6.0 - 2022-10-04 (FluBBa)
 	Fixed 5885 sprites when screen is flipped.
 
@@ -49,4 +54,3 @@ V0.1.0 - 2016-09-10 (FluBBa)
 
 V0.0.0 - 2005-06-05 (FluBBa)
 	First GBA release.
-

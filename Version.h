@@ -1,1 +1,1 @@
-#define K005849VERSION "V0.6.0"
+#define K005849VERSION "V0.6.1"

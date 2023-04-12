@@ -7,6 +7,9 @@
 extern "C" {
 #endif
 
+#define CHIP_K005849 (0)
+#define CHIP_K005885 (1)
+
 /** \brief  Game screen height in pixels */
 #define GAME_HEIGHT (224)
 /** \brief  Game screen width in pixels */

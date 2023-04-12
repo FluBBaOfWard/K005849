@@ -12,7 +12,7 @@ Konami 005849
 ------
 Green Beret, Jail Break, Mr. Goemon & Scooter Shooter use this chip.
 It manages 48 sprites and a 64x32 tilemap.
-The chip also generates clock and 3 interrupt signals (suitable for a 6809/Z80).
+The chip also generates clock and 3 interrupt signals (suitable for a M6809/Z80).
 It uses 0x2000 bytes of RAM for the tilemaps and sprites, and an additional
 0x40(0x100?) bytes for scroll RAM. The maximum addressable ROM is 0x20000 bytes.
 Tile and sprite data both come from the same ROM space.
@@ -118,7 +118,7 @@ Two 256x4 lookup PROMs are also used to increase the color combinations.
 All tilemap / sprite priority handling is done internally and the chip exports
 5 bits of color code, composed of 1 bit indicating tile or sprite, and 4 bits
 of ROM data remapped through the PROM.
-396 cycles per scanline.
+384 cycles per scanline, 262 scanlines.
 
 inputs:
 - address lines (A0-A13)

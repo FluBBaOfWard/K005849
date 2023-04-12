@@ -11,6 +11,7 @@
 #include "K005849.i"
 
 	.global k005849Reset
+	.global k005849SetType
 	.global k005849SaveState
 	.global k005849LoadState
 	.global k005849GetStateSize
@@ -19,11 +20,13 @@
 	.global addBackgroundTiles
 	.global doScanline
 	.global copyScrollValues
+	.global convertTileMap
 	.global convertTileMap5849
 	.global convertTileMap5885
 	.global convertTileMapJackal
 	.global convertTileMapDD
 	.global convertTileMapDDFG
+	.global convertSprites
 	.global convertSprites5849
 	.global convertSprites5885
 	.global k005849Ram_R
@@ -81,6 +84,13 @@ k005849Reset:		;@ r0=NMI(periodicIrqFunc), r1=IRQ(frameIrqFunc), r2=FIRQ(frame2I
 dummyIrqFunc:
 	bx lr
 
+;@----------------------------------------------------------------------------
+k005849SetType:			;@ r0 = Chip type.
+;@----------------------------------------------------------------------------
+	cmp r0,#CHIP_K005849
+	movne r0,#CHIP_K005885
+	strb r0,[koptr,#chipType]
+	bx lr
 ;@----------------------------------------------------------------------------
 k005849SaveState:		;@ In r0=destination, r1=koptr. Out r0=state size.
 	.type   k005849SaveState STT_FUNC
@@ -353,6 +363,12 @@ checkTileReload:
 	mov r2,#BGBLOCKCOUNT		;@ 512 tile entries
 	b memset_					;@ Prepare lut
 ;@----------------------------------------------------------------------------
+convertTileMap:				;@ in r0 = destination.
+;@----------------------------------------------------------------------------
+	ldrb r1,[koptr,#chipType]
+	cmp r1,#CHIP_K005849
+	bne convertTileMap5885
+;@----------------------------------------------------------------------------
 convertTileMap5849:			;@ r0 = destination
 ;@----------------------------------------------------------------------------
 	stmfd sp!,{r3-r11,lr}
@@ -619,7 +635,7 @@ lineStateTable:
 	.long 0, newFrame			;@ zeroLine
 	.long 239, endFrame			;@ Last visible scanline
 	.long 240, checkFrameIRQ	;@ frameIRQ
-	.long 256, frameEndHook		;@ totalScanlines
+	.long 262, frameEndHook		;@ totalScanlines
 ;@----------------------------------------------------------------------------
 #ifdef GBA
 	.section .iwram, "ax", %progbits	;@ For the GBA
@@ -791,6 +807,12 @@ reloadSprites:
 ;@----------------------------------------------------------------------------
 	.equ PRIORITY,	0x800		;@ 0x800=AGB OBJ priority 2
 ;@----------------------------------------------------------------------------
+convertSprites:				;@ in r0 = destination.
+;@----------------------------------------------------------------------------
+	ldrb r1,[koptr,#chipType]
+	cmp r1,#CHIP_K005849
+	bne convertSprites5885
+;@----------------------------------------------------------------------------
 convertSprites5849:			;@ in r0 = destination.
 ;@----------------------------------------------------------------------------
 	stmfd sp!,{r4-r11,lr}
@@ -953,7 +975,7 @@ dm4:
 	mvneq r0,#0x02
 	moveq r4,#0x12
 	cmp r2,#0x04				;@ 16x8
-	orreq r1,r1,#0x00020000
+	orreq r1,r1,#0x00200000
 	mvneq r0,#0x01
 	moveq r4,#0x21
 

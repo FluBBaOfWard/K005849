@@ -1,6 +1,9 @@
 ;@ ASM header for the K005849/K005885 emulator
 ;@
 
+#define CHIP_K005849 (0)
+#define CHIP_K005885 (1)
+
 /** \brief  Game screen height in pixels */
 #define GAME_HEIGHT (224)
 /** \brief  Game screen width in pixels */
@@ -39,10 +42,13 @@ scrollXReg:		.byte 0			;@ 1 (Scroll X. ofs?).
 scrollAxis:		.byte 0			;@ 2 (bit 0 Scroll X bit8?, bit 1 = use ram scroll, bit 2 = ram scroll y?), JB 0x02, 0x06. GB 0x02. MrG 0x02. IH 0x0A. FI 0x00. DD 0x02, 0x01, 0x00.
 sprBank:		.byte 0			;@ 3 (005885 0x3=tilebank, 0x8=sprram), JB 0x02, 0xC2, (0xC2, 0xCA)... . GB (0x82, 0x8A)... MrG (0xA2, 0xAA)... IH (0xE2, 0xEA)... (0xE3, 0xEB)... FI 0x04. DD 0x00
 irqControl:		.byte 0			;@ 4, JB 0x00 (0x00,0x01, 0x02, 0x03), IH 0x15, (0x1C, 0x1D)... DD 0x02
+koPadding0:		.space 3
 
 isIronHorse:	.byte 0
 spritePaletteOffset:	.byte 0
 frameOdd:		.byte 0
+chipType:		.byte 0
+
 gfxReload:
 bgMemReload:	.byte 0
 sprMemReload:	.byte 0
