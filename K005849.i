@@ -4,10 +4,12 @@
 #define CHIP_K005849 (0)
 #define CHIP_K005885 (1)
 
+/** \brief  Game screen width in pixels */
+#define GAME_WIDTH (256)
 /** \brief  Game screen height in pixels */
 #define GAME_HEIGHT (224)
-/** \brief  Game screen width in pixels */
-#define GAME_WIDTH  (256)
+/** \brief  Total horizontal pixel count */
+#define H_PIXEL_COUNT (384)
 
 	.equ BGSRCTILECOUNTBITS,	13
 	.equ BGDSTTILECOUNTBITS,	10
@@ -44,16 +46,18 @@ sprBank:		.byte 0			;@ 3 (005885 0x3=tilebank, 0x8=sprram), JB 0x02, 0xC2, (0xC2
 irqControl:		.byte 0			;@ 4, JB 0x00 (0x00,0x01, 0x02, 0x03), IH 0x15, (0x1C, 0x1D)... DD 0x02
 koPadding0:		.space 3
 
+chipType:		.byte 0
+periodicIrqMask:.byte 0			;@ 0x1F or 0x3F depending on irqControl bit 0x10.
 isIronHorse:	.byte 0
 spritePaletteOffset:	.byte 0
 frameOdd:		.byte 0
-chipType:		.byte 0
+koPadding1:		.space 3
 
 gfxReload:
 bgMemReload:	.byte 0
 sprMemReload:	.byte 0
 sprPalReload:	.byte 0
-koPadding1:		.space 1
+koPadding2:		.space 1
 
 bgMemAlloc:		.long 0
 sprMemAlloc:	.long 0

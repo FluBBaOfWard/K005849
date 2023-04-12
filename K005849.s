@@ -331,6 +331,11 @@ irqW:				;@ Register 4
 ;@	mov r11,r11					;@ No$GBA breakpoint
 	stmfd sp!,{r4,lr}
 	strb r0,[koptr,#irqControl]
+	mov r1,#0x1F
+	tst r0,#0x10				;@ Scanline timer 64 instead of 32
+	orrne r1,r1,#0x20
+	strb r1,[koptr,#periodicIrqMask]
+	
 	mov r4,r0
 	ands r0,r4,#4
 	moveq lr,pc
@@ -344,7 +349,6 @@ irqW:				;@ Register 4
 	ldmfd sp!,{r4,lr}
 
 //	tst r0,#0x08				;@ Screen flip bit
-//	tst r0,#0x10				;@ Scanline timer 64 instead of 32
 
 	bx lr
 
@@ -662,7 +666,8 @@ doScanline:
 ;@----------------------------------------------------------------------------
 checkScanlineIRQ:
 ;@----------------------------------------------------------------------------
-	ands r0,r0,#0x1f			;@ NMI every 32th scanline
+	ldrb r1,[koptr,#periodicIrqMask]
+	ands r0,r0,r1				;@ NMI every 32nd/64th scanline
 	bxne lr
 
 	stmfd sp!,{lr}
