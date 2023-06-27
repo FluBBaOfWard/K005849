@@ -920,9 +920,9 @@ convertSprites5885:			;@ in r0 = destination.
 
 	ldrb r0,[koptr,#sprBank]
 	and r0,r0,#0x08
+	eor r0,r0,#0x10				;@ Finalizer requires this way (Maybe also ddribble?), Iron Horse wants eor 0x18.
 	ldr r10,[koptr,#gfxRAM]
-	add r10,r10,#0x1800
-	sub r10,r10,r0,lsl#8		;@ Iron Horse wants it this way. Maybe not ddribble?
+	add r10,r10,r0,lsl#8
 
 	ldr r7,=gScaling
 	ldrb r7,[r7]

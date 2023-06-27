@@ -2,11 +2,12 @@ K005849 revision history
 -=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 
-V0.6.1 - 2023-04-12 (FluBBa)
+V0.6.1 - 2023-06-27 (FluBBa)
 	Added defines for the two different chips.
 	Fixed vertical timing.
 	Fixed 16x8 sprites.
 	Fixed periodic irq time selection.
+	Tweaked 5885 sprite buffer selection.
 
 V0.6.0 - 2022-10-04 (FluBBa)
 	Fixed 5885 sprites when screen is flipped.
