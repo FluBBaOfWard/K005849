@@ -164,13 +164,13 @@ convertTiles5885:			;@ r0 = dest, r1 = src1, r2 = src2, r3 = length.
 	stmfd sp!,{r4-r5,lr}
 	ldr lr,=0x0F0F0F0F
 bgChr5885:
-	ldrb r4,[r1],#1
-	ldrb r5,[r2],#1
+	ldrh r4,[r1],#2
+	ldrh r5,[r2],#2
+	orr r4,r4,r4,lsl#8
+	bic r4,r4,#0xFF00
+	orr r5,r5,r5,lsl#8
+	bic r5,r5,#0xFF00
 	orr r4,r4,r5,lsl#8
-	ldrb r5,[r1],#1
-	orr r4,r4,r5,lsl#16
-	ldrb r5,[r2],#1
-	orr r4,r4,r5,lsl#24
 
 	and r5,lr,r4,lsr#4
 	and r4,lr,r4
