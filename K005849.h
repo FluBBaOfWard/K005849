@@ -1,4 +1,10 @@
-// Konami 005849/005885 Video Chip emulation
+//
+//  K005849.h
+//  Konami 005849/005885 Video Chip emulator for GBA/NDS.
+//
+//  Created by Fredrik Ahlström on 2005-06-05.
+//  Copyright © 2005-2024 Fredrik Ahlström. All rights reserved.
+//
 
 #ifndef K005849_HEADER
 #define K005849_HEADER
@@ -10,9 +16,9 @@ extern "C" {
 #define CHIP_K005849 (0)
 #define CHIP_K005885 (1)
 
-/** \brief  Game screen height in pixels */
+/** Game screen height in pixels */
 #define GAME_HEIGHT (224)
-/** \brief  Game screen width in pixels */
+/** Game screen width in pixels */
 #define GAME_WIDTH  (256)
 
 typedef struct {

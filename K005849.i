@@ -1,14 +1,23 @@
-;@ ASM header for the K005849/K005885 emulator
 ;@
+;@  K005849.i
+;@  Konami 005849/005885 Video Chip emulator for GBA/NDS.
+;@
+;@  Created by Fredrik Ahlström on 2005-06-05.
+;@  Copyright © 2005-2024 Fredrik Ahlström. All rights reserved.
+;@
+
+#if !__ASSEMBLER__
+	#error This header file is only for use in assembly files!
+#endif
 
 #define CHIP_K005849 (0)
 #define CHIP_K005885 (1)
 
-/** \brief  Game screen width in pixels */
+/** Game screen width in pixels */
 #define GAME_WIDTH (256)
-/** \brief  Game screen height in pixels */
+/** Game screen height in pixels */
 #define GAME_HEIGHT (224)
-/** \brief  Total horizontal pixel count */
+/** Total horizontal pixel count */
 #define H_PIXEL_COUNT (384)
 
 	.equ BGSRCTILECOUNTBITS,	13

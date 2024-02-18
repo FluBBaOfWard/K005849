@@ -1,4 +1,10 @@
-// Konami 005849/005885 Video Chip emulation
+;@
+;@  K005849.s
+;@  Konami 005849/005885 Video Chip emulator for GBA/NDS.
+;@
+;@  Created by Fredrik Ahlström on 2005-06-05.
+;@  Copyright © 2005-2024 Fredrik Ahlström. All rights reserved.
+;@
 
 #ifdef __arm__
 
