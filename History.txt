@@ -2,6 +2,9 @@ K005849 revision history
 -=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 
+V0.6.2 - 2024-03-09 (FluBBa)
+	Resets more variables.
+
 V0.6.1 - 2023-06-27 (FluBBa)
 	Added defines for the two different chips.
 	Fixed vertical timing.

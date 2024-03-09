@@ -102,8 +102,8 @@ byte #1:    attributes
 Konami 005885
 ------
 Double Dribble, Finalizer, Iron Horse & Jackal use this chip.
-Some games use two of these in pair. Jackal even puts together the two 4bpp
-tilemaps to form a single 8bpp one.
+Double Dribble & Jackal use two of these in pair, Jackal even puts together
+the two 4bpp tilemaps to form a single 8bpp one.
 It manages 64 sprites and 2 32x32 or 1 64x32 tilemap (only Double Dribble uses
 the 64x32 one).
 The chip also generates clock and interrupt signals suitable for a 6809.
@@ -345,7 +345,7 @@ control registers
  * ------------------
  *
  * There are 64 sprites, each one using 5 bytes. However the number of
- * sprites can be increased to 0x80 with a control register (Combat School
+ * sprites can be increased to 128 with a control register (Combat School
  * sets it on and off during the game).
  *
  * Byte | Bit(s)   | Use
@@ -359,7 +359,7 @@ control registers
  *   4  | xx------ | sprite code bank bits 3/2
  *   4  | --x----- | flip y
  *   4  | ---x---- | flip x
- *   4  | ----xxx- | sprite size 000=16x16 001=16x8 010=8x16 011=8x8 100=32x32
+ *   4  | ----xxx- | sprite size 000=16x16 001=16x8 010=8x16 011=8x8 1xx=32x32
  *   4  | -------x | x position (high bit)
  *
  * Flack Attack uses a different, "wider" layout with 32 bytes per sprite,

@@ -68,6 +68,10 @@ k005849Reset:		;@ r0=NMI(periodicIrqFunc), r1=IRQ(frameIrqFunc), r2=FIRQ(frame2I
 	str r0,[koptr,#gfxReload]
 	ldr r0,=0x0FF					;@ Double Dribble requires 0x1FF
 	str r0,[koptr,#spriteMask]
+	mov r0,#0
+	strb r0,[koptr,#spritePaletteOffset]
+	strb r0,[koptr,#isIronHorse]
+
 
 	ldmfd sp!,{r0-r3,lr}
 	cmp r0,#0
