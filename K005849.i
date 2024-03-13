@@ -12,6 +12,7 @@
 
 #define CHIP_K005849 (0)
 #define CHIP_K005885 (1)
+#define CHIP_K005885B (2)	// Bootleg version of Jackal
 
 /** Game screen width in pixels */
 #define GAME_WIDTH (256)
