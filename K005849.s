@@ -871,6 +871,7 @@ convertSprites5849:			;@ in r0 = destination.
 dm5:
 	ldr r4,[r10,#-4]!			;@ K005849 OBJ, r4=Tile,Attrib,Xpos,Ypos.
 	movs r0,r4,lsr#24			;@ Mask Y, check yPos 0
+	cmpne r0,#0xF0				;@ Check yPos GAME_HEIGHT
 	beq skipSprite
 	movs r1,r4,lsr#16			;@ Attrib bit7, xpos bit 8
 	and r1,r1,#0xFF				;@ XPos
@@ -886,7 +887,7 @@ dm5:
 	add r0,r5,r0,lsr#24			;@ YPos + size + scaling
 	orr r0,r0,r1,lsr#7			;@ XPos
 
-	and r1,r4,#0x3000			;@ X/Yflip
+	and r1,r4,#0x3000			;@ X/Y-flip
 	eor r0,r0,r1,lsl#16
 	str r0,[r11],#4				;@ Store OBJ Atr 0,1. Xpos, ypos, flip, scale/rot, size, shape.
 
@@ -894,7 +895,7 @@ dm5:
 	and r1,r4,#0x4000
 	orr r0,r0,r1,lsr#6
 	mov r0,r0,lsl#2
-	bl getSpriteFromCache5885	;@ Jump to spr copy, takes tile# in r0, gives new tile# in r0
+	bl getSpriteFromCache		;@ Jump to spr copy, takes tile# in r0, gives new tile# in r0
 
 	and r1,r4,#0x0F00			;@ Color
 	orr r0,r0,r1,lsl#4
@@ -908,13 +909,6 @@ skipSprite:
 	mov r0,#0x200+SCREEN_HEIGHT	;@ Double, y=SCREEN_HEIGHT
 	str r0,[r11],#8
 	b dm3
-
-dm7:
-	mov r0,#0x200+SCREEN_HEIGHT	;@ Double, y=SCREEN_HEIGHT
-	str r0,[r11],#8
-	subs r8,r8,#1
-	bne dm7
-	ldmfd sp!,{r4-r11,pc}
 
 ;@----------------------------------------------------------------------------
 convertSprites5885:			;@ in r0 = destination.
@@ -962,6 +956,7 @@ convertSprites5885:			;@ in r0 = destination.
 dm4:
 	ldrb r3,[r10,#-3]			;@ K005885 OBJ, Y pos
 	cmp r3,#0x00				;@ Check yPos 0
+	cmpne r3,#0xF0				;@ Check yPos GAME_HEIGHT
 	beq dm8
 	ldrb r1,[r10,#-2]			;@ X pos
 	ldrb r2,[r10,#-1]			;@ Size, flip, high X bit.
@@ -972,7 +967,7 @@ dm4:
 	subeq r1,r1,#((GAME_WIDTH-SCREEN_WIDTH)/2)<<23
 	rsbne r1,r1,#0x80000000		;@ Flip Xpos
 
-	and r0,r2,#0x60				;@ X/Yflip
+	and r0,r2,#0x60				;@ X/Y-flip
 	eor r1,r1,r0,lsr#2
 
 	mvn r0,#0					;@ Tile number mask
@@ -1018,7 +1013,7 @@ dm4:
 	orr r1,r1,r1,lsr#20
 	and r0,r0,r1,ror#30
 
-	bl getSpriteFromCache5885	;@ Takes tile# in r0, gives new tile# in r0
+	bl getSpriteFromCache		;@ Takes tile# in r0, gives new tile# in r0
 
 	ldrb r1,[koptr,#spritePaletteOffset]
 	add r4,r4,r1,lsl#4
@@ -1043,7 +1038,7 @@ spriteCacheFull:
 	str r2,[koptr,#sprMemAlloc]
 	ldmfd sp!,{r4-r11,pc}
 ;@----------------------------------------------------------------------------
-getSpriteFromCache5885:		;@ Takes tile# in r0, returns new tile# in r0
+getSpriteFromCache:			;@ Takes tile# in r0, returns new tile# in r0
 ;@----------------------------------------------------------------------------
 	mov r2,r0,ror#SPRGROUPTILECOUNTBITS
 	adr r1,lowBitTable
