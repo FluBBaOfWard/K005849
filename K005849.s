@@ -3,9 +3,8 @@
 ;@  Konami 005849/005885 Video Chip emulator for GBA/NDS.
 ;@
 ;@  Created by Fredrik Ahlström on 2005-06-05.
-;@  Copyright © 2005-2024 Fredrik Ahlström. All rights reserved.
+;@  Copyright © 2005-2026 Fredrik Ahlström. All rights reserved.
 ;@
-
 #ifdef __arm__
 
 #ifdef GBA
@@ -209,7 +208,7 @@ bgChrLoop1:
 
 ;@----------------------------------------------------------------------------
 #ifdef GBA
-	.section .ewram,"ax"
+	.section .ewram, "ax", %progbits
 #endif
 ;@----------------------------------------------------------------------------
 k005849Ram_R:				;@ Ram read (0x0000-0x1FFF)
